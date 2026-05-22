@@ -14,23 +14,14 @@ COPY scripts/package.json ./scripts/
 
 RUN pnpm install --frozen-lockfile
 
-# Copy all source
+# Copy all source (frontend is pre-built, dist/ is committed)
 COPY . .
 
-# Build libs first
-ARG CACHEBUST=2
-RUN pnpm run typecheck:libs
-
-# Build frontend (PORT and BASE_PATH use defaults during build)
-ENV NODE_ENV=production
-ENV BASE_PATH=/
-RUN pnpm --filter @workspace/dark-gpt run build
-
-# Copy frontend build into api-server public folder
+# Copy pre-built frontend into api-server public folder
 RUN mkdir -p artifacts/api-server/public && \
     cp -r artifacts/dark-gpt/dist/public/. artifacts/api-server/public/
 
-# Build backend
+# Build backend only
 RUN pnpm --filter @workspace/api-server run build
 
 # Final stage
