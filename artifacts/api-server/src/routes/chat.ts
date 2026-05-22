@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  const apiKey = await getGroqApiKey();
+  const apiKey = getGroqApiKey();
 
   if (!apiKey) {
     res.status(503).json({

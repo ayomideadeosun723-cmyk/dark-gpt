@@ -9,7 +9,6 @@ COPY artifacts/dark-gpt/package.json ./artifacts/dark-gpt/
 COPY lib/api-spec/package.json ./lib/api-spec/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
 COPY lib/api-zod/package.json ./lib/api-zod/
-COPY lib/db/package.json ./lib/db/
 COPY scripts/package.json ./scripts/
 
 RUN pnpm install --frozen-lockfile
@@ -34,7 +33,6 @@ COPY artifacts/api-server/package.json ./artifacts/api-server/
 COPY lib/api-spec/package.json ./lib/api-spec/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
 COPY lib/api-zod/package.json ./lib/api-zod/
-COPY lib/db/package.json ./lib/db/
 COPY scripts/package.json ./scripts/
 
 RUN pnpm install --frozen-lockfile --prod
