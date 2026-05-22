@@ -18,6 +18,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build libs first
+ARG CACHEBUST=2
 RUN pnpm run typecheck:libs
 
 # Build frontend (PORT and BASE_PATH use defaults during build)
