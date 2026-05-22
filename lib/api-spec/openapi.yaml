@@ -207,8 +207,6 @@ components:
             $ref: "#/components/schemas/ChatMessage"
         userName:
           type: string
-        groqKey:
-          type: string
       required: [messages]
 
     ChatResponse:

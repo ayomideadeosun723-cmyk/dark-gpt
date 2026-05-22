@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Groq from "groq-sdk";
+import { getGroqApiKey } from "./owner";
 
 const router = Router();
 
@@ -33,15 +34,11 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  // Accept API key from: 1) env var (server-side), 2) request header, 3) request body
-  const apiKey =
-    process.env.GROQ_API_KEY ||
-    (req.headers["x-groq-api-key"] as string) ||
-    (req.body?.groqKey as string);
+  const apiKey = await getGroqApiKey();
 
   if (!apiKey) {
     res.status(503).json({
-      error: "No Groq API key found. Add it via the 🔑 button in the app, or set GROQ_API_KEY in your environment.",
+      error: "The Groq API key has not been set. The owner must configure it via the Owner Panel.",
     });
     return;
   }

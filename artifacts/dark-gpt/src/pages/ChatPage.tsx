@@ -8,73 +8,6 @@ interface Message {
   content: string;
 }
 
-function KeyModal({ onClose }: { onClose: () => void }) {
-  const [val, setVal] = useState(() => localStorage.getItem("darkgpt_groq_key") ?? "");
-  const [saved, setSaved] = useState(false);
-
-  const save = () => {
-    if (val.trim()) localStorage.setItem("darkgpt_groq_key", val.trim());
-    else localStorage.removeItem("darkgpt_groq_key");
-    setSaved(true);
-    setTimeout(() => { setSaved(false); onClose(); }, 800);
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.88)", backdropFilter: "blur(6px)" }}
-    >
-      <div
-        className="w-full max-w-md rounded-sm p-6 box-glow-red"
-        style={{ background: "linear-gradient(135deg,#0d0000,#1a0000)", border: "1px solid #8b0000" }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-cinzel text-blood text-sm uppercase tracking-widest glow-red-subtle">
-            🔑 Groq API Key
-          </h2>
-          <button onClick={onClose} className="text-red-900 hover:text-blood text-lg">✕</button>
-        </div>
-
-        <p className="font-crimson text-sm mb-4" style={{ color: "#c8a0a0" }}>
-          Get a free key at{" "}
-          <a href="https://console.groq.com" target="_blank" rel="noreferrer" className="text-blood underline hover:text-blood-light">
-            console.groq.com
-          </a>{" "}
-          — takes 30 seconds.
-        </p>
-
-        <input
-          type="password"
-          value={val}
-          onChange={(e) => setVal(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && save()}
-          placeholder="gsk_••••••••••••••••••••••••••"
-          className="input-dark w-full px-3 py-3 rounded-sm font-mono text-sm mb-4"
-          autoFocus
-        />
-
-        <div className="flex gap-3">
-          <button onClick={save} className="btn-dark flex-1 py-2.5 rounded-sm text-xs">
-            {saved ? "✓ SAVED" : "SAVE KEY"}
-          </button>
-          {localStorage.getItem("darkgpt_groq_key") && (
-            <button
-              onClick={() => { localStorage.removeItem("darkgpt_groq_key"); setVal(""); }}
-              className="px-4 py-2.5 rounded-sm text-xs font-cinzel border border-red-900/50 text-red-900 hover:text-blood transition-all"
-            >
-              CLEAR
-            </button>
-          )}
-        </div>
-
-        <p className="font-crimson text-xs mt-3 text-center" style={{ color: "#4a1515" }}>
-          Stored locally in your browser only.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([{
     id: "0",
@@ -83,8 +16,6 @@ export default function ChatPage() {
   }]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [hasKey, setHasKey] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
@@ -92,7 +23,6 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!localStorage.getItem("darkgpt_entered")) setLocation("/");
-    setHasKey(!!localStorage.getItem("darkgpt_groq_key"));
   }, [setLocation]);
 
   useEffect(() => {
@@ -101,7 +31,6 @@ export default function ChatPage() {
 
   const handleSend = async () => {
     if (!input.trim() || isThinking) return;
-    const groqKey = localStorage.getItem("darkgpt_groq_key") ?? "";
     const userMsg: Message = { id: Date.now().toString(), role: "user", content: input.trim() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -109,17 +38,13 @@ export default function ChatPage() {
 
     try {
       const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
-      const result = await sendMessage.mutateAsync({
-        data: { messages: history, groqKey: groqKey || undefined },
-      });
+      const result = await sendMessage.mutateAsync({ data: { messages: history } });
       setMessages((prev) => [...prev, { id: (Date.now()+1).toString(), role: "assistant", content: result.message }]);
     } catch {
       setMessages((prev) => [...prev, {
         id: (Date.now()+1).toString(),
         role: "assistant",
-        content: !groqKey
-          ? "No Groq API key found. Click the 🔑 button in the top bar and paste your key — it takes 30 seconds."
-          : "The connection to the abyss falters... Check your API key and try again.",
+        content: "The connection to the abyss falters... Try again in a moment.",
       }]);
     } finally {
       setIsThinking(false);
@@ -143,10 +68,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-abyss">
-      {showKeyModal && (
-        <KeyModal onClose={() => { setShowKeyModal(false); setHasKey(!!localStorage.getItem("darkgpt_groq_key")); }} />
-      )}
-
       {/* Sidebar */}
       <div
         className="flex flex-col transition-all duration-300 overflow-hidden border-r border-red-900/30 flex-shrink-0"
@@ -160,13 +81,6 @@ export default function ChatPage() {
             </div>
             <div className="h-px bg-red-900/30" />
             <button onClick={clearChat} className="btn-dark text-xs py-2 px-3 rounded-sm">+ New Séance</button>
-            <button
-              onClick={() => setShowKeyModal(true)}
-              className="btn-dark text-xs py-2 px-3 rounded-sm"
-              style={hasKey ? { borderColor: "#226622", color: "#44cc44" } : { borderColor: "#cc6600", color: "#ff9944" }}
-            >
-              🔑 {hasKey ? "API Key ✓" : "Set API Key"}
-            </button>
             <div className="flex-1" />
             <p className="font-cinzel text-xs text-red-900/40 uppercase tracking-widest">Created by</p>
             <p className="font-crimson text-sm text-blood-dark">LORDFYT</p>
@@ -194,33 +108,9 @@ export default function ChatPage() {
             <span className="hidden md:block font-cinzel text-xs text-red-900/40 tracking-widest uppercase">by LORDFYT</span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowKeyModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-cinzel text-xs border transition-all duration-300"
-              style={hasKey
-                ? { background: "rgba(0,50,0,0.4)", borderColor: "#226622", color: "#44cc44" }
-                : { background: "rgba(80,30,0,0.5)", borderColor: "#cc6600", color: "#ff9944" }
-              }
-            >
-              🔑 {hasKey ? "Key Set ✓" : "Add Key"}
-            </button>
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
           </div>
         </header>
-
-        {/* No key warning banner */}
-        {!hasKey && (
-          <div
-            className="flex items-center justify-between px-4 py-2 cursor-pointer"
-            style={{ background: "linear-gradient(90deg,#2d1000,#1a0800)", borderBottom: "1px solid #8b4400" }}
-            onClick={() => setShowKeyModal(true)}
-          >
-            <p className="font-crimson text-sm" style={{ color: "#ff9944" }}>
-              ⚠️ Add your Groq API key to awaken the darkness — click here
-            </p>
-            <span className="font-cinzel text-xs text-orange-500 underline">ADD →</span>
-          </div>
-        )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto scrollable p-4 space-y-4">

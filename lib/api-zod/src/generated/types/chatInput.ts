@@ -10,5 +10,4 @@ import type { ChatMessage } from './chatMessage';
 export interface ChatInput {
   messages: ChatMessage[];
   userName?: string;
-  groqKey?: string;
 }

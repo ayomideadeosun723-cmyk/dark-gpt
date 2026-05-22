@@ -69,8 +69,7 @@ export const SendMessageBody = zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string()
 })),
-  "userName": zod.string().optional(),
-  "groqKey": zod.string().optional()
+  "userName": zod.string().optional()
 })
 
 export const SendMessageResponse = zod.object({

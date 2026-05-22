@@ -54,7 +54,6 @@ export interface AccessKeyResponse {
 export interface ChatInput {
   messages: ChatMessage[];
   userName?: string;
-  groqKey?: string;
 }
 
 export interface ChatResponse {

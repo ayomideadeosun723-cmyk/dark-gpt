@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LoginPage from "@/pages/LoginPage";
 import ChatPage from "@/pages/ChatPage";
+import OwnerPage from "@/pages/OwnerPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export default function App() {
         <Switch>
           <Route path="/" component={LoginPage} />
           <Route path="/chat" component={ChatPage} />
+          <Route path="/owner" component={OwnerPage} />
           <Route component={NotFound} />
         </Switch>
       </WouterRouter>
