@@ -17,7 +17,12 @@ RUN pnpm install --frozen-lockfile
 # Copy all source
 COPY . .
 
-# Build frontend
+# Build libs first
+RUN pnpm run typecheck:libs
+
+# Build frontend (PORT and BASE_PATH use defaults during build)
+ENV NODE_ENV=production
+ENV BASE_PATH=/
 RUN pnpm --filter @workspace/dark-gpt run build
 
 # Copy frontend build into api-server public folder
